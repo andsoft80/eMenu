@@ -15,6 +15,21 @@ var app = express();
 var multer = require('multer');
 var upload = multer({dest: 'uploads/'});
 var cors = require('cors');
+app.use(express.static('static'));
+app.use(express.static('images'));
+var session = require('express-session');
+var MySQLStore = require('express-mysql-session')(session);
+var mailer = require("nodemailer");
+var smtpTransport = mailer.createTransport({
+    service: "Gmail",
+    auth: {
+        user: "andsoft80@gmail.com",
+        pass: "Professional666"
+    }
+});
+var bcrypt = require('bcryptjs');
+var salt = bcrypt.genSaltSync(10);
+var secret = 'death666';
 /////////////////////////////////////////////////////
 
 //var con = mysql.createConnection({
@@ -30,9 +45,55 @@ var con = mysql.createConnection({
     password: 'user',
     database: "emenu"
 });
+var mySqlConnect = function () {
+    con.on('error', function (err) {
+
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+
+
+
+            console.log("MySQL lost connection. Reconnect...");
+
+            con = mysql.createConnection({
+                host: mySqlHost,
+                user: "user",
+                password: "user",
+                database: "karplay"
+            });
+            con.connect(function (err) {
+                if (err)
+                    throw err;
+                console.log("Connected!");
+            });
+            mySqlConnect();
+        }
+
+
+
+    });
+};
+mySqlConnect();
+
+var sessionStore = new MySQLStore({
+
+    clearExpired: true,
+    // How frequently expired sessions will be cleared; milliseconds:
+    checkExpirationInterval: 20000000,
+    // The maximum age of a valid session; milliseconds:
+    expiration: 86400000
+}/* session store options */, con);
+
+app.use(session({
+    key: 'emenu',
+    secret: 'death666',
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false
+
+}));
 
 app.use(express.json());       // to support JSON-encoded bodies
-//app.use(express.urlencoded()); // to support URL-encoded bodies
+app.use(express.urlencoded({extended: false})); // to support URL-encoded bodies
 app.use(cors());
 con.connect(function (err) {
     if (err)
@@ -151,7 +212,119 @@ app.post('/profile', upload.single('avatar'), function (req, res, next) {
     // req.file is the `avatar` file
     // req.body will hold the text fields, if there were any
     res.end(req.file.filename);
-})
+});
+app.post("/adduser", function (request, response) {
+
+    var email = request.body.email;
+    var name = request.body.name;
+    var pwd = request.body.pwd;
+    parcel = {};
+
+    var hash = bcrypt.hashSync(pwd, salt);
+    var sql = "insert into users (email, name, pwd) values ('" + email + "','" + name + "','" + hash + "')";
+    con.query(sql, function (err, result) {
+        if (err) {
+            parcel.err = err;
+
+        } else {
+            parcel.auth = 'ok';
+        }
+
+        response.write(JSON.stringify(parcel));
+        response.end();
+    });
+
+
+});
+app.post("/checkuser", function (request, response) {
+    var parcel = {"auth": ""};
+    var email = request.body.email;
+    var pwd = request.body.pwd;
+
+    var sql = "select * from users where email = '" + email + "'";
+    con.query(sql, function (err, result) {
+        if (err)
+            throw err;
+
+        if (result.length === 0) {
+            parcel.auth = 'notusr';
+        } else {
+            var hash = result[0].pwd;
+            if (bcrypt.compareSync(pwd, hash)) {
+                parcel.auth = 'ok';
+                parcel.name = result[0].name;
+                parcel.signature = bcrypt.hashSync(secret + result[0].email, salt);
+                request.session.user = result[0].email;
+                request.session.name = result[0].name;
+            } else {
+                parcel.auth = 'notpass';
+            }
+        }
+        response.write(JSON.stringify(parcel));
+        response.end();
+    });
+
+});
+
+app.post("/recover", function (request, response) {
+    var parcel = {};
+    var email = request.body.email;
+    var newPwd = 'temppass' + Math.floor(Math.random() * 1000);
+
+    var sql = "select * from users where email = '" + email + "'";
+    con.query(sql, function (err, result) {
+        if (err)
+            throw err;
+
+        if (result.length === 0) {
+            parcel.auth = 'notusr';
+        } else {
+            var mail = {
+                from: "eMenu(not reply)",
+                to: email,
+                subject: "Восстановление пароля",
+                text: "Ваш новый пароль : " + newPwd
+
+            };
+
+            smtpTransport.sendMail(mail, function (error, res) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    var sql = "update users  set pwd ='" + bcrypt.hashSync(newPwd, salt) + "' where email = '" + email + "'";
+                    con.query(sql, function (err, result) {
+                        if (err)
+                            throw err;
+                    });
+                }
+
+                smtpTransport.close();
+            });
+
+            parcel.auth = 'ok';
+
+
+
+        }
+        response.write(JSON.stringify(parcel));
+        response.end();
+    });
+
+});
+app.post("/getauth", function (request, response) {
+    var parcel = {};
+    var curruser = request.session.user;
+    if (typeof curruser !== 'undefined') {
+        parcel.email = request.session.user;
+        parcel.name = request.session.name;
+    } else {
+        parcel.email = 'empty';
+        parcel.name = 'empty';
+    }
+    response.write(JSON.stringify(parcel));
+    response.end();
+
+});
 
 
 
