@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 ///////base set//////////////////////////////
+var mySqlHost = '185.220.35.146';
 var http = require("http");
 var fs = require('fs');
 var util = require('util');
@@ -40,10 +41,10 @@ var secret = 'death666';
 //});
 
 var con = mysql.createConnection({
-    host: '185.220.35.146',
+    host: mySqlHost,
     user: 'user',
     password: 'user',
-    database: "emenu"
+    database: "karplay"
 });
 var mySqlConnect = function () {
     con.on('error', function (err) {
@@ -58,7 +59,7 @@ var mySqlConnect = function () {
                 host: mySqlHost,
                 user: "user",
                 password: "user",
-                database: "karplay"
+                database: "emenu"
             });
             con.connect(function (err) {
                 if (err)
@@ -102,8 +103,8 @@ con.connect(function (err) {
 
 });
 
-app.listen(3000, function () {
-    console.log('Start : localhost:3000');
+app.listen(port, function () {
+    console.log('Start : localhost: '+port);
 });
 
 /////////////universal api//////////////////////////////////

@@ -9,21 +9,44 @@ and open the template in the editor.
     <head>
         <link rel="stylesheet" href="http://cdn.webix.com/edge/webix.css" type="text/css"> 
         <script src="http://cdn.webix.com/edge/webix.js" type="text/javascript"></script>  
-    </head>
-    <body>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
         <script type="text/javascript" charset="utf-8">
-            webix.ui({
-                rows: [
-                    {view: "template",
-                        type: "header", template: "My App!"},
-                    {view: "datatable",
-                        autoConfig: true,
-                        data: {
-                            title: "My Fair Lady", year: 1964, votes: 533848, rating: 8.9, rank: 5
-                        }
-                    }
-                ]
+
+            var grida,grida_data = null;
+
+            $.ajax({
+                type: "post",
+                async: false,
+                url: "/table/users/action/get",
+                success: function (data) {
+
+                    grida = {
+
+                        view: "datatable",
+//                        data: JSON.parse(data)
+                        columns: [
+                            {id: "id", header: "ID", width: 50},
+                            {id: "name", header: "Name", width: 200},
+                            {id: "email", header: "Email", width: 200}
+
+                        ]
+
+
+                    };
+                    grida_data = data;
+
+                }
+            });
+            grida.data = JSON.parse(grida_data);
+
+            webix.ready(function () {
+                webix.ui(grida);
             });
         </script>
+    </head>
+    <body>
+
     </body>
 </html>
