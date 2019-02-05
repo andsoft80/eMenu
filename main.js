@@ -59,7 +59,7 @@ var mySqlConnect = function () {
                 host: mySqlHost,
                 user: "user",
                 password: "user",
-                database: "emenu"
+                database: "karplay"
             });
             con.connect(function (err) {
                 if (err)
@@ -104,7 +104,7 @@ con.connect(function (err) {
 });
 
 app.listen(port, function () {
-    console.log('Start : localhost: '+port);
+    console.log('Start : localhost: ' + port);
 });
 
 /////////////universal api//////////////////////////////////
@@ -166,28 +166,45 @@ app.post('/table/:tableName/action/:action', function (req, res) {
 
     }
     if (action === 'get') {
-        
+
         var id = req.body.id;
         var condition = req.body.condition;
-       
+
         var str = '';
         if (condition) {
-            
-            str = "where " + condition[0].field + " = '" + condition[0].value +"'";
+
+            str = "where " + condition[0].field + " = '" + condition[0].value + "'";
             for (i = 1; i < condition.length; i++) {
-                str = str + ' and ' + condition[i].field + " = '" + condition[i].value+"'";
+                str = str + ' and ' + condition[i].field + " = '" + condition[i].value + "'";
             }
         }
         if (id) {
-            sqlStr = "select * from " + tableName + " where id =  " + id +" "+str;
+            sqlStr = "select * from " + tableName + " where id =  " + id + " " + str;
         } else {
-            sqlStr = "select * from " + tableName +" "+str;
+            sqlStr = "select * from " + tableName + " " + str;
         }
 
 
         con.query(sqlStr, function (err, result) {
             if (err)
                 res.end(JSON.stringify(err));
+            res.end(JSON.stringify(result));
+
+        });
+
+
+    }
+    if (action === 'get_columns') {//webix format
+        
+
+        sqlStr = "DESC " + tableName;
+        con.query(sqlStr, function (err, result) {
+            if (err)
+                res.end(JSON.stringify(err));
+
+
+
+            //console.log(JSON.stringify(columns));
             res.end(JSON.stringify(result));
 
         });
