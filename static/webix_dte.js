@@ -25,6 +25,7 @@ function parseColumnsInfo(data) {
 function buildCRUDTable(tableName, columnsNames) {
     //columnsNames = [{idx(Index of column), name(Name of column)},...]
     var grida = {};
+    var gridToolBar = {};
 
     $.ajax({
         type: "post",
@@ -35,7 +36,20 @@ function buildCRUDTable(tableName, columnsNames) {
             grida = {
 
                 view: "datatable",
+                
+                editable:true,
+                editaction: "dblclick",
+                id: "mytab",
                 columns: (parseColumnsInfo(data))
+            };
+            gridToolBar = {
+                view: "toolbar",
+                elements: [
+//                    { gravity: 4},
+                    {view: "button", type: "icon", icon: "webix_icon wxi-file", label: "Создать", width:120},
+                    {view: "button", type: "icon", icon: "webix_icon wxi-pencil", label: "Изменить", width:120},
+                    {view: "button", type: "icon", icon: "webix_icon wxi-trash", label: "Удалить", width:120}
+                ]
             };
 
             $.ajax({
@@ -46,9 +60,9 @@ function buildCRUDTable(tableName, columnsNames) {
 
 
                     grida.data = JSON.parse(data);
-                    
+
                     if (columnsNames) {
-                        
+
                         for (var i = 0; i < grida.columns.length; i++) {
                             grida.columns[i].hidden = true;
 
@@ -59,8 +73,10 @@ function buildCRUDTable(tableName, columnsNames) {
                             grida.columns[columnsNames[i].idx].hidden = false;
                             grida.columns[columnsNames[i].idx].header = columnsNames[i].name;
                             //grida.columns[columnsNames[i].idx].width = columnsNames[i].width;
+
+                            grida.columns[columnsNames[i].idx].adjust = true;
+                            grida.columns[columnsNames[i].idx].editor = 'text';
                             
-                            grida.columns[columnsNames[i].idx].adjust  = true;
 
                         }
                     }
@@ -73,7 +89,9 @@ function buildCRUDTable(tableName, columnsNames) {
 
         }
     });
-    return grida;
+
+    var obj = [gridToolBar, grida];
+    return obj;
 }
 
 
