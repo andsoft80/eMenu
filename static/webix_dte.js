@@ -22,6 +22,7 @@ function parseColumnsInfo(data) {
     }
     return columns;
 }
+
 function buildCRUDTable(tableName, columnsNames) {
     //columnsNames = [{idx(Index of column), name(Name of column)},...]
     var grida = {};
@@ -36,19 +37,19 @@ function buildCRUDTable(tableName, columnsNames) {
             grida = {
 
                 view: "datatable",
-                
+                select:'row',
                 editable:true,
                 editaction: "dblclick",
-                id: "mytab",
+                id: tableName,
                 columns: (parseColumnsInfo(data))
             };
             gridToolBar = {
                 view: "toolbar",
                 elements: [
 //                    { gravity: 4},
-                    {view: "button", type: "icon", icon: "webix_icon wxi-file", label: "Создать", width:120},
-                    {view: "button", type: "icon", icon: "webix_icon wxi-pencil", label: "Изменить", width:120},
-                    {view: "button", type: "icon", icon: "webix_icon wxi-trash", label: "Удалить", width:120}
+                    {view: "button", id: tableName+'_create', type: "icon", icon: "webix_icon wxi-file", label: "Создать", width:120},
+                    {view: "button", id: tableName+'_edit',type: "icon", icon: "webix_icon wxi-pencil", label: "Изменить", width:120},
+                    {view: "button", id: tableName+'_delete',type: "icon", icon: "webix_icon wxi-trash", label: "Удалить", width:120}
                 ]
             };
 
