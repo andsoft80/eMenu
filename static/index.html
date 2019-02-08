@@ -11,13 +11,13 @@ and open the template in the editor.
         <script src="http://cdn.webix.com/edge/webix.js" type="text/javascript"></script>  
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script src="webix_dte.js" type="text/javascript"></script>
-        <!--<link rel="stylesheet" href="https://cdn.materialdesignicons.com/2.7.94/css/materialdesignicons.css" type="text/css" charset="utf-8">-->
+        <link rel="stylesheet" href="https://cdn.materialdesignicons.com/2.7.94/css/materialdesignicons.css" type="text/css" charset="utf-8">
 
         <script type="text/javascript" charset="utf-8">
 
 
 
-
+            var tableName = 'users';
 
 
             var colinfo = [
@@ -35,15 +35,59 @@ and open the template in the editor.
                     container: 'box',
                     rows: grida
                 });
-                $$("users").select('1',true);
-                $$("users_create").attachEvent('onItemClick',function(){
-                    $$("users").add({});
+                $$(tableName).select('1', true);
+                $$(tableName + "_create").attachEvent('onItemClick', function () {
+                    if (!$$(tableName).getItem('*')) {
+                        $$(tableName).add({id: '*'}, 0);
+                    } else {
+                        alert('У вас уже есть строка которую вы создаете! Сохраните или удалите ее...');
+                    }
                 });
-                    
-                
+                $$(tableName + "_delete").attachEvent('onItemClick', function () {
+
+
+                    webix.confirm({
+                        title: "Удаление строки",
+                        ok: "Да", cancel: "Отмена",
+
+                        text: "Подтверждаете удаление?",
+                        callback: function (result) {
+
+                            if (result) {
+                                var selId = $$(tableName).getSelectedId(true)[0];
+
+                                if (selId == '*') {
+
+                                    $$(tableName).remove(selId);
+                                }
+
+                            }
+                        }
+                    });
+
+
+
+
+                });
+
+                $$(tableName + "_save").attachEvent('onItemClick', function () {
+                    var selId = $$(tableName).getSelectedId(true)[0];
+                    var item = $$(tableName).getItem(selId);
+                    $.ajax({
+                        type: "post",
+                        async: false,
+                        url: "/table/" + tableName + "/action/put",
+                        data: item,
+                        success: function (data) {
+                            
+                        }
+                    });
+                });
+
+
             });
-            
-            
+
+
         </script>
     </head>
     <body>

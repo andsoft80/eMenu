@@ -37,8 +37,8 @@ function buildCRUDTable(tableName, columnsNames) {
             grida = {
 
                 view: "datatable",
-                select:'row',
-                editable:true,
+                select: 'row',
+                editable: true,
                 editaction: "dblclick",
                 id: tableName,
                 columns: (parseColumnsInfo(data))
@@ -47,9 +47,9 @@ function buildCRUDTable(tableName, columnsNames) {
                 view: "toolbar",
                 elements: [
 //                    { gravity: 4},
-                    {view: "button", id: tableName+'_create', type: "icon", icon: "webix_icon wxi-file", label: "Создать", width:120},
-                    {view: "button", id: tableName+'_edit',type: "icon", icon: "webix_icon wxi-pencil", label: "Изменить", width:120},
-                    {view: "button", id: tableName+'_delete',type: "icon", icon: "webix_icon wxi-trash", label: "Удалить", width:120}
+                    {view: "button", id: tableName + '_create', type: "icon", icon: "mdi mdi-file", label: "Создать", width: 120},
+                    {view: "button", id: tableName + '_save', type: "icon", icon: "mdi mdi-content-save", label: "Сохранить", width: 120},
+                    {view: "button", id: tableName + '_delete', type: "icon", icon: "mdi mdi-delete", label: "Удалить", width: 120}
                 ]
             };
 
@@ -76,8 +76,10 @@ function buildCRUDTable(tableName, columnsNames) {
                             //grida.columns[columnsNames[i].idx].width = columnsNames[i].width;
 
                             grida.columns[columnsNames[i].idx].adjust = true;
-                            grida.columns[columnsNames[i].idx].editor = 'text';
-                            
+                            if (grida.columns[columnsNames[i].idx].id!=='id'){
+                                grida.columns[columnsNames[i].idx].editor = 'text';
+                            }
+
 
                         }
                     }
