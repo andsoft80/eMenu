@@ -15,149 +15,30 @@ and open the template in the editor.
 
         <script type="text/javascript" charset="utf-8">
 
+        //function createCrudTable(table, colinfo)
 
+            var tableName = 'clients';
+             var colinfo = null;
 
-            var tableName = 'users';
-
-
-            var colinfo = [
-                {"idx": 0, "name": "#"},
-                {"idx": 1, "name": "Эл.почта"},
-                {"idx": 2, "name": "Имя"},
-                {"idx": 3, "name": "Пароль"}
-            ];
+//            colinfo = [
+//                {"idx": 0, "name": "#"},
+//                {"idx": 1, "name": "Эл.почта"},
+//                {"idx": 2, "name": "Имя"},
+//                {"idx": 3, "name": "Пароль"},
+//                {"idx": 4, "name": "Клиент"}
+//            ];
 
             // var colinfo = null;
-            var grida = buildCRUDTable(tableName, colinfo);
-            var gridaMain = null;
+            
+            
             webix.ready(function () {
-                var refresh = function () {
-                    ///////////////////////////////////////refresh
-                    $$(tableName).clearAll();
-                    $.ajax({
-                        type: "post",
-                        async: false,
-                        url: "/table/" + tableName + "/action/get",
-                        success: function (data) {
 
 
-                            $$(tableName).parse(JSON.parse(data));
-
-                        }
-                    });
-                    ///////////////////////////////////////
-                };
-
-                gridaMain = new webix.ui({
+                webix.ui({
                     container: 'box',
-                    rows: grida
-                });
-                $$(tableName).select('1', true);
-                $$(tableName + "_create").attachEvent('onItemClick', function () {
-                    if (!$$(tableName).getItem('*')) {
-                        $$(tableName).add({id: '*'}, 0);
-                    } else {
-                        alert('У вас уже есть строка которую вы создаете! Сохраните или удалите ее...');
-                    }
-                });
-                $$(tableName + "_delete").attachEvent('onItemClick', function () {
-
-
-                    webix.confirm({
-                        title: "Удаление строки",
-                        ok: "Да", cancel: "Отмена",
-
-                        text: "Подтверждаете удаление?",
-                        callback: function (result) {
-                            var selId = $$(tableName).getSelectedId(true)[0];
-
-                            if (result) {
-
-
-                                if (selId == '*') {
-
-                                    $$(tableName).remove(selId);
-                                } else {
-
-                                    var parcel = {};
-                                    parcel.id = selId.id;
-
-                                    $.ajax({
-                                        type: "post",
-                                        async: false,
-                                        url: "/table/" + tableName + "/action/delete",
-                                        data: parcel,
-                                        success: function (data) {
-                                            var parcel = JSON.parse(data);
-                                            if (parcel.serverStatus === 2) {
-
-                                                refresh();
-
-
-                                            } else {
-                                                alert(data);
-                                            }
-                                        }
-                                    });
-                                }
-
-                            }
-                        }
-                    });
-
-
-
-
+                    rows: buildCRUDTable('clients', null)
                 });
 
-                $$(tableName + "_save").attachEvent('onItemClick', function () {
-                    var selId = $$(tableName).getSelectedId(true)[0];
-                    var item = $$(tableName).getItem(selId);
-                    if (selId != '*') {
-
-
-
-                        $.ajax({
-                            type: "post",
-                            async: false,
-                            url: "/table/" + tableName + "/action/put",
-                            data: item,
-                            success: function (data) {
-                                var parcel = JSON.parse(data);
-                                if (parcel.serverStatus === 2) {
-
-//                                    refresh();
-
-
-                                } else {
-                                    alert(data);
-                                }
-                            }
-                        });
-                    } else {
-
-                        delete item['id'];
-                        $.ajax({
-                            type: "post",
-                            async: false,
-                            url: "/table/" + tableName + "/action/post",
-                            data: item,
-                            success: function (data) {
-                                var parcel = JSON.parse(data);
-                                if (parcel.serverStatus === 2) {
-
-                                    refresh();
-
-
-                                } else {
-                                    alert(data);
-                                }
-                            }
-                        });
-
-                    }
-
-                });
 
 
             });

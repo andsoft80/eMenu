@@ -5,6 +5,7 @@
  */
 ///////base set//////////////////////////////
 var mySqlHost = '185.220.35.146';
+var mySqlDB = 'emenu';
 var http = require("http");
 var fs = require('fs');
 var util = require('util');
@@ -44,7 +45,7 @@ var con = mysql.createConnection({
     host: mySqlHost,
     user: 'user',
     password: 'user',
-    database: "karplay"
+    database: mySqlDB
 });
 var mySqlConnect = function () {
     con.on('error', function (err) {
@@ -59,7 +60,7 @@ var mySqlConnect = function () {
                 host: mySqlHost,
                 user: "user",
                 password: "user",
-                database: "karplay"
+                database: mySqlDB
             });
             con.connect(function (err) {
                 if (err)
