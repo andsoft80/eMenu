@@ -3,6 +3,46 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+var grida = {};
+var gridToolBar = {};
+
+function refresh(columnsNames) {
+    $.ajax({
+        type: "post",
+        async: false,
+        url: "/table/" + tableName + "/action/get",
+        success: function (data) {
+
+
+            grida.data = JSON.parse(data);
+
+            if (columnsNames) {
+
+                for (var i = 0; i < grida.columns.length; i++) {
+                    grida.columns[i].hidden = true;
+
+
+                }
+                for (var i = 0; i < columnsNames.length; i++) {
+
+                    grida.columns[columnsNames[i].idx].hidden = false;
+                    grida.columns[columnsNames[i].idx].header = columnsNames[i].name;
+                    //grida.columns[columnsNames[i].idx].width = columnsNames[i].width;
+
+                    grida.columns[columnsNames[i].idx].adjust = true;
+                    if (grida.columns[columnsNames[i].idx].id !== 'id') {
+                        grida.columns[columnsNames[i].idx].editor = 'text';
+                    }
+
+
+                }
+            }
+
+
+
+        }
+    });
+}
 function parseColumnsInfo(data) {
     var columns = [];
 
@@ -25,8 +65,7 @@ function parseColumnsInfo(data) {
 
 function buildCRUDTable(tableName, columnsNames) {
     //columnsNames = [{idx(Index of column), name(Name of column)},...]
-    var grida = {};
-    var gridToolBar = {};
+
 
     $.ajax({
         type: "post",
@@ -53,41 +92,7 @@ function buildCRUDTable(tableName, columnsNames) {
                 ]
             };
 
-            $.ajax({
-                type: "post",
-                async: false,
-                url: "/table/" + tableName + "/action/get",
-                success: function (data) {
-
-
-                    grida.data = JSON.parse(data);
-
-                    if (columnsNames) {
-
-                        for (var i = 0; i < grida.columns.length; i++) {
-                            grida.columns[i].hidden = true;
-
-
-                        }
-                        for (var i = 0; i < columnsNames.length; i++) {
-
-                            grida.columns[columnsNames[i].idx].hidden = false;
-                            grida.columns[columnsNames[i].idx].header = columnsNames[i].name;
-                            //grida.columns[columnsNames[i].idx].width = columnsNames[i].width;
-
-                            grida.columns[columnsNames[i].idx].adjust = true;
-                            if (grida.columns[columnsNames[i].idx].id!=='id'){
-                                grida.columns[columnsNames[i].idx].editor = 'text';
-                            }
-
-
-                        }
-                    }
-
-
-
-                }
-            });
+            refresh(columnsNames);
 
 
         }

@@ -107,11 +107,11 @@ app.listen(port, function () {
     console.log('Start : localhost: ' + port);
 });
 
-/////////////universal api//////////////////////////////////
+/////////////universal sql api//////////////////////////////////
 app.post('/table/:tableName/action/:action', function (req, res) {
     var tableName = req.params.tableName;
     var action = req.params.action;
-
+    console.log(action);
     if (action === 'post') {
         sqlStr = "INSERT INTO " + tableName + " (";
         for (i = 0; i < Object.keys(req.body).length; i++) {
@@ -153,9 +153,11 @@ app.post('/table/:tableName/action/:action', function (req, res) {
     }
 
     if (action === 'delete') {
+        
         var id = req.body.id;
+        
         sqlStr = "delete from " + tableName + " where id =  " + id;
-
+        
         con.query(sqlStr, function (err, result) {
             if (err)
                 res.end(JSON.stringify(err));

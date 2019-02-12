@@ -28,9 +28,26 @@ and open the template in the editor.
             ];
 
             // var colinfo = null;
-            var grida = buildCRUDTable('users', colinfo);
+            var grida = buildCRUDTable(tableName, colinfo);
             var gridaMain = null;
             webix.ready(function () {
+                var refresh = function () {
+                    ///////////////////////////////////////refresh
+                    $$(tableName).clearAll();
+                    $.ajax({
+                        type: "post",
+                        async: false,
+                        url: "/table/" + tableName + "/action/get",
+                        success: function (data) {
+
+
+                            $$(tableName).parse(JSON.parse(data));
+
+                        }
+                    });
+                    ///////////////////////////////////////
+                };
+
                 gridaMain = new webix.ui({
                     container: 'box',
                     rows: grida
@@ -52,13 +69,36 @@ and open the template in the editor.
 
                         text: "Подтверждаете удаление?",
                         callback: function (result) {
+                            var selId = $$(tableName).getSelectedId(true)[0];
 
                             if (result) {
-                                var selId = $$(tableName).getSelectedId(true)[0];
+
 
                                 if (selId == '*') {
 
                                     $$(tableName).remove(selId);
+                                } else {
+
+                                    var parcel = {};
+                                    parcel.id = selId.id;
+
+                                    $.ajax({
+                                        type: "post",
+                                        async: false,
+                                        url: "/table/" + tableName + "/action/delete",
+                                        data: parcel,
+                                        success: function (data) {
+                                            var parcel = JSON.parse(data);
+                                            if (parcel.serverStatus === 2) {
+
+                                                refresh();
+
+
+                                            } else {
+                                                alert(data);
+                                            }
+                                        }
+                                    });
                                 }
 
                             }
@@ -73,15 +113,50 @@ and open the template in the editor.
                 $$(tableName + "_save").attachEvent('onItemClick', function () {
                     var selId = $$(tableName).getSelectedId(true)[0];
                     var item = $$(tableName).getItem(selId);
-                    $.ajax({
-                        type: "post",
-                        async: false,
-                        url: "/table/" + tableName + "/action/put",
-                        data: item,
-                        success: function (data) {
-                            
-                        }
-                    });
+                    if (selId != '*') {
+
+
+
+                        $.ajax({
+                            type: "post",
+                            async: false,
+                            url: "/table/" + tableName + "/action/put",
+                            data: item,
+                            success: function (data) {
+                                var parcel = JSON.parse(data);
+                                if (parcel.serverStatus === 2) {
+
+//                                    refresh();
+
+
+                                } else {
+                                    alert(data);
+                                }
+                            }
+                        });
+                    } else {
+
+                        delete item['id'];
+                        $.ajax({
+                            type: "post",
+                            async: false,
+                            url: "/table/" + tableName + "/action/post",
+                            data: item,
+                            success: function (data) {
+                                var parcel = JSON.parse(data);
+                                if (parcel.serverStatus === 2) {
+
+                                    refresh();
+
+
+                                } else {
+                                    alert(data);
+                                }
+                            }
+                        });
+
+                    }
+
                 });
 
 
