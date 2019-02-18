@@ -112,7 +112,7 @@ app.listen(port, function () {
 app.post('/table/:tableName/action/:action', function (req, res) {
     var tableName = req.params.tableName;
     var action = req.params.action;
-    console.log(action);
+    
     if (action === 'post') {
         sqlStr = "INSERT INTO " + tableName + " (";
         for (i = 0; i < Object.keys(req.body).length; i++) {
@@ -239,10 +239,13 @@ app.post("/adduser", function (request, response) {
     var email = request.body.email;
     var name = request.body.name;
     var pwd = request.body.pwd;
+    var clientid = request.body.clientid;
     parcel = {};
 
     var hash = bcrypt.hashSync(pwd, salt);
-    var sql = "insert into users (email, name, pwd) values ('" + email + "','" + name + "','" + hash + "')";
+    
+    var sql = "insert into users (email, name, pwd, clientid) values ('" + email + "','" + name + "','" + hash + "','"+clientid+"')";
+
     con.query(sql, function (err, result) {
         if (err) {
             parcel.err = err;
@@ -277,10 +280,12 @@ app.post("/checkuser", function (request, response) {
                 parcel.signature = bcrypt.hashSync(secret + result[0].email, salt);
                 request.session.user = result[0].email;
                 request.session.name = result[0].name;
+                request.session.clientid = result[0].clientid;
             } else {
                 parcel.auth = 'notpass';
             }
         }
+        
         response.write(JSON.stringify(parcel));
         response.end();
     });
@@ -338,11 +343,21 @@ app.post("/getauth", function (request, response) {
     if (typeof curruser !== 'undefined') {
         parcel.email = request.session.user;
         parcel.name = request.session.name;
+        parcel.clientid = request.session.clientid;
+        
     } else {
         parcel.email = 'empty';
         parcel.name = 'empty';
     }
     response.write(JSON.stringify(parcel));
+    response.end();
+
+});
+app.post("/logout", function (request, response) {
+    if (request.session) {
+        request.session.destroy(function () {});
+    }
+    response.write(JSON.stringify('session destroy'));
     response.end();
 
 });
