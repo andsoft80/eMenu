@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="myApp">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -23,7 +23,7 @@
         <!-- AdminLTE Skins. Choose a skin from the css/skins
              folder instead of downloading all of them to reduce the load. -->
         <link rel="stylesheet" href="dist/css/skins/all-md-skins.min.css">
-
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -34,8 +34,87 @@
         <!-- Google Font -->
         <link rel="stylesheet"
               href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+        <script>
+            var app = angular.module('myApp', []);
+            app.controller('myCtrl', function ($scope) {
+
+                $scope.currUserEmail = null;
+                $scope.currUserName = null;
+                $scope.currUserClientid = null;
+                $scope.currUserClientName = null;
+                $scope.currUserClientUID = null;
+
+
+                $scope.getAuth = function () {
+
+                    $.ajax({
+                        type: "post",
+                        //                                    async: false,
+                        url: "/getauth",
+                        //headers: {"Access-Control-Allow-Origin": "*"},
+                        success: function (data) {
+
+                            var parcel = JSON.parse(data);
+                            if (parcel.email !== 'empty') {
+
+                                afterLogin(parcel.email, parcel.name, parcel.clientid);
+                            } else {
+                                afterLogout();
+
+                            }
+                        }
+                    });
+                }
+                function afterLogin(email, name, clientid) {
+                    var parcel = {}; 
+                    $scope.currUserEmail = email;
+                    $scope.currUserName = name;
+                    $scope.currUserClientid = clientid;
+                    parcel.id = clientid;
+                    $.ajax({
+                        type: "post",
+                        async: false,
+                        data: parcel,
+                        url: "/table/clients/action/get",
+                        success: function (data) {
+                            
+                            var res = JSON.parse(data);
+                            
+                            $scope.currUserClientName = res[0].name;
+                            $scope.currUserClientUID = res[0].uid;
+                            
+                            $scope.$apply();
+
+                        }
+                    });
+                    $scope.$apply();
+                }
+                function afterLogout() {
+
+                    $scope.currUserEmail = null;
+                    $scope.currUserName = null;
+                    $scope.currUserClientid = null;
+                    $scope.currUserClientName = null;
+                    $scope.currUserClientUID = null;
+//                window.location = host + 'login.html';
+                    window.location = '/login.html';
+                }
+                $scope.logout = function () {
+                    $.ajax({
+                        type: "post",
+                        //                                    async: false,
+                        url: "/logout",
+                        success: function (data) {
+                            afterLogout();
+
+                        }
+                    });
+                }
+            });
+        </script>
     </head>
-    <body class="hold-transition skin-blue sidebar-mini">
+    <body class="hold-transition skin-blue sidebar-mini" ng-controller="myCtrl" ng-init="getAuth()">
         <div class="wrapper">
 
             <header class="main-header">
@@ -84,7 +163,7 @@
                             <li class="dropdown user user-menu">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                     <img src="dist/img/user.png" class="user-image" alt="User Image">
-                                    <span class="hidden-xs">Saulin Andrey</span>
+                                    <span class="hidden-xs" >{{currUserName}}</span>
                                 </a>
                                 <ul class="dropdown-menu">
                                     <!-- User image -->
@@ -92,7 +171,7 @@
                                         <img src="dist/img/user.png" class="img-circle" alt="User Image">
 
                                         <p>
-                                            Aeroclub - Saulin Andrey
+                                            {{currUserClientName}} - {{currUserName}}
                                             <!--                  <small>Member since Nov. 2012</small>-->
                                         </p>
                                     </li>
@@ -112,7 +191,7 @@
                                             <a href="#" class="btn btn-default btn-flat">Профиль</a>
                                         </div>
                                         <div class="pull-right">
-                                            <a href="#" class="btn btn-default btn-flat">Выйти</a>
+                                            <a href="#" class="btn btn-default btn-flat" ng-click="logout()">Выйти</a>
                                         </div>
                                     </li>
                                 </ul>
@@ -132,7 +211,7 @@
                             <img src="dist/img/ent.jpg" class="img-circle" alt="User Image">
                         </div>
                         <div class="pull-left info">
-                            <p>Aeroclub</p>
+                            <p>{{currUserClientName}}</p>
 
                         </div>
                     </div>
@@ -209,7 +288,7 @@
                                 </div>
                                 <!-- /.box-header -->
                                 <div class="box-body">
-                                    <table id="example1" class="table table-bordered table-striped">
+                                    <table id="example1" class="table table-bordered table-striped table-hover table-condensed">
                                         <thead>
                                             <tr>
                                                 <th>Rendering engine</th>
@@ -675,7 +754,7 @@
         <script src="dist/js/material.min.js"></script>
         <script src="dist/js/ripples.min.js"></script>
         <script>
-            $.material.init();
+                $.material.init();
         </script>
         <!-- DataTables -->
         <script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
@@ -690,34 +769,34 @@
         <script src="dist/js/demo.js"></script>
         <!-- page script -->
         <script>
-            $(function () {
-                $('#example1').DataTable({
-                    language: {
-                        //processing: "Traitement en cours...",
-                        search: "Поиск:",
-                        lengthMenu: "Показывать _MENU_ записей",
-                        info: "Показано с _START_ по _END_ из _TOTAL_ записей",
-                        //infoEmpty: "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
-                        //infoFiltered: "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
-                        //infoPostFix: "",
-                        loadingRecords: "Загрузка записей...",
-                        zeroRecords: "Записей не обнаружено",
-                        emptyTable: "Таблица пустая",
-                        paginate: {
-                            first: "Первая",
-                            previous: "Пред.",
-                            next: "След.",
-                            last: "Последняя"
-                        }
-                        //,
+                $(function () {
+                    $('#example1').DataTable({
+                        language: {
+                            //processing: "Traitement en cours...",
+                            search: "Поиск:",
+                            lengthMenu: "Показывать _MENU_ записей",
+                            info: "Показано с _START_ по _END_ из _TOTAL_ записей",
+                            //infoEmpty: "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
+                            //infoFiltered: "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
+                            //infoPostFix: "",
+                            loadingRecords: "Загрузка записей...",
+                            zeroRecords: "Записей не обнаружено",
+                            emptyTable: "Таблица пустая",
+                            paginate: {
+                                first: "Первая",
+                                previous: "Пред.",
+                                next: "След.",
+                                last: "Последняя"
+                            }
+                            //,
 //                        aria: {
 //                            sortAscending: ": activer pour trier la colonne par ordre croissant",
 //                            sortDescending: ": activer pour trier la colonne par ordre décroissant"
 //                        }
-                    }
-                });
+                        }
+                    });
 
-            })
+                })
         </script>
     </body>
 </html>
