@@ -44,13 +44,34 @@
                 $scope.currUserClientid = null;
                 $scope.currUserClientName = null;
                 $scope.currUserClientUID = null;
+                $scope.currOrder = null;
+                $scope.currOrders = null;
+                $scope.currAdmins = null;
+                $scope.currRooms = null;
+                
+
+                $scope.currOrder = [
+                    {"group": "Еда", "items": [
+                            {"name": "Печенье", "qty": "1", "dim": "упак"}
+                        ]},
+                    {"group": "Напитки", "items": [
+                            {"name": "Чай зеленый", "qty": "1", "dim": "шт"},
+                            {"name": "Чай черный", "qty": "2", "dim": "шт"}
+                        ]}]
+                        ;
+
+
+//                $scope.currAdmins = [{"id": "0", "name": "Выберите..."}, {"id": "1", "name": "Andrey Saulin"}];
+                //$scope.currRooms = [{"id": "1", "name": "Rio"}, {"id": "2", "name": "Dehli"}];
+
+
 
 
                 $scope.getAuth = function () {
 
                     $.ajax({
                         type: "post",
-                        //                                    async: false,
+                        async: false,
                         url: "/getauth",
                         //headers: {"Access-Control-Allow-Origin": "*"},
                         success: function (data) {
@@ -67,7 +88,7 @@
                     });
                 }
                 function afterLogin(email, name, clientid) {
-                    var parcel = {}; 
+                    var parcel = {};
                     $scope.currUserEmail = email;
                     $scope.currUserName = name;
                     $scope.currUserClientid = clientid;
@@ -78,12 +99,12 @@
                         data: parcel,
                         url: "/table/clients/action/get",
                         success: function (data) {
-                            
+
                             var res = JSON.parse(data);
-                            
+
                             $scope.currUserClientName = res[0].name;
                             $scope.currUserClientUID = res[0].uid;
-                            
+
                             $scope.$apply();
 
                         }
@@ -97,6 +118,10 @@
                     $scope.currUserClientid = null;
                     $scope.currUserClientName = null;
                     $scope.currUserClientUID = null;
+                    $scope.currOrder = null;
+                    $scope.currOrders = null;
+                    $scope.currAdmins = null;
+                    $scope.currRooms = null;
 //                window.location = host + 'login.html';
                     window.location = '/login.html';
                 }
@@ -109,12 +134,74 @@
                             afterLogout();
 
                         }
+                    }
+                    );
+                }
+                var condition = [{"field": "clientid", "value": $scope.currUserClientid}];
+
+                function getAdmins() {
+                    var parcel = {};
+                    parcel.condition = condition;
+                    $.ajax({
+                        type: "post",
+                        //                                    async: false,
+                        url: "/table/users/action/get",
+                        data: parcel,
+                        //headers: {"Access-Control-Allow-Origin": "*"},
+                        success: function (data) {
+                            $scope.currAdmins = JSON.parse(data);
+                            $scope.$apply();
+
+                        }
                     });
                 }
+                
+                function getRooms() {
+                    var parcel = {};
+                    parcel.condition = condition;
+                    $.ajax({
+                        type: "post",
+                        //                                    async: false,
+                        url: "/table/rooms/action/get",
+                        data: parcel,
+                        //headers: {"Access-Control-Allow-Origin": "*"},
+                        success: function (data) {
+                            alert(data);
+                            $scope.currRooms = JSON.parse(data);
+                            $scope.$apply();
+
+                        }
+                    });
+                }
+                
+                
+                
+                function getNewOrders() {
+
+                    $.ajax({
+                        type: "get",
+                        async: false,
+                        url: "/orderstatus/Новый/" + $scope.currUserClientid,
+
+                        //headers: {"Access-Control-Allow-Origin": "*"},
+                        success: function (data) {
+
+                            $scope.currOrders = JSON.parse(data);
+                            $scope.$apply();
+
+                        }
+                    });
+                }
+                $scope.getAuth();
+                getAdmins();
+                //getRooms();
+                getNewOrders();
             });
+
+
         </script>
     </head>
-    <body class="hold-transition skin-blue sidebar-mini" ng-controller="myCtrl" ng-init="getAuth()">
+    <body class="hold-transition skin-blue sidebar-mini" ng-controller="myCtrl" >
         <div class="wrapper">
 
             <header class="main-header">
@@ -281,8 +368,29 @@
                 <!-- Main content -->
                 <section class="content">
                     <div class="row">
-                        <div class="col-xs-12">
-                            <div class="box">
+                        <div class="col-md-6 col-md-push-6 col-xs-12 " >
+                            <div class="box" >
+                                <div class="box-header">
+                                    <h3 class="box-title">Состав заказа</h3>
+                                    <div ng-repeat="element in currOrder">
+                                        <h4>{{element.group}}</h4>
+                                        <ul>
+                                            <li ng-repeat="item in element.items">{{item.name}} {{item.qty}} {{item.dim}}</li>
+                                        </ul>
+                                    </div>    
+
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="box-body">
+
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                            <!-- /.box -->    
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-md-6  col-md-pull-6 col-xs-12 ">
+                            <div class="box" >
                                 <div class="box-header">
                                     <h3 class="box-title">Новые заказы</h3>
                                 </div>
@@ -291,429 +399,83 @@
                                     <table id="example1" class="table table-bordered table-striped table-hover table-condensed">
                                         <thead>
                                             <tr>
-                                                <th>Rendering engine</th>
-                                                <th>Browser</th>
-                                                <th>Platform(s)</th>
-                                                <th>Engine version</th>
-                                                <th>CSS grade</th>
+                                                <th>Номер</th>
+                                                <th>Дата</th>
+                                                <th>Комната</th>
+                                                <th>Статус</th>
+                                                <th>Исполнитель</th>
+
+
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>Trident</td>
-                                                <td>Internet
-                                                    Explorer 4.0
+                                            <tr ng-repeat="order in currOrders">
+                                                <td>{{order.id}}</td>
+                                                <td>{{order.orderdate}}</td>
+                                                <td>{{order.name}}</td>
+                                                <td><select ng-model="order.status">
+                                                        <option>Новый</option>
+                                                        <option>Отменен</option>
+                                                        <option>В работе</option>
+                                                        <option>Закрыт</option>
+                                                    </select>
                                                 </td>
-                                                <td>Win 95+</td>
-                                                <td> 4</td>
-                                                <td>X</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Trident</td>
-                                                <td>Internet
-                                                    Explorer 5.0
+                                                <td>
+<!--                                                    <select ng-model="order.admin" ng-options="element.name for element in currAdmins">
+
+                                                    </select>-->
+                                                    
+                                                    <select ng-model="order.admin">
+                                                        
+                                                        <option  ng-repeat="element in currAdmins" ng-value="element.id">{{element.name}}</option>
+                                                    </select>
+                                                    <!--{{order.admin}}-->
                                                 </td>
-                                                <td>Win 95+</td>
-                                                <td>5</td>
-                                                <td>C</td>
                                             </tr>
-                                            <tr>
-                                                <td>Trident</td>
-                                                <td>Internet
-                                                    Explorer 5.5
-                                                </td>
-                                                <td>Win 95+</td>
-                                                <td>5.5</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Trident</td>
-                                                <td>Internet
-                                                    Explorer 6
-                                                </td>
-                                                <td>Win 98+</td>
-                                                <td>6</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Trident</td>
-                                                <td>Internet Explorer 7</td>
-                                                <td>Win XP SP2+</td>
-                                                <td>7</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Trident</td>
-                                                <td>AOL browser (AOL desktop)</td>
-                                                <td>Win XP</td>
-                                                <td>6</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Firefox 1.0</td>
-                                                <td>Win 98+ / OSX.2+</td>
-                                                <td>1.7</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Firefox 1.5</td>
-                                                <td>Win 98+ / OSX.2+</td>
-                                                <td>1.8</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Firefox 2.0</td>
-                                                <td>Win 98+ / OSX.2+</td>
-                                                <td>1.8</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Firefox 3.0</td>
-                                                <td>Win 2k+ / OSX.3+</td>
-                                                <td>1.9</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Camino 1.0</td>
-                                                <td>OSX.2+</td>
-                                                <td>1.8</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Camino 1.5</td>
-                                                <td>OSX.3+</td>
-                                                <td>1.8</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Netscape 7.2</td>
-                                                <td>Win 95+ / Mac OS 8.6-9.2</td>
-                                                <td>1.7</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Netscape Browser 8</td>
-                                                <td>Win 98SE+</td>
-                                                <td>1.7</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Netscape Navigator 9</td>
-                                                <td>Win 98+ / OSX.2+</td>
-                                                <td>1.8</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Mozilla 1.0</td>
-                                                <td>Win 95+ / OSX.1+</td>
-                                                <td>1</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Mozilla 1.1</td>
-                                                <td>Win 95+ / OSX.1+</td>
-                                                <td>1.1</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Mozilla 1.2</td>
-                                                <td>Win 95+ / OSX.1+</td>
-                                                <td>1.2</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Mozilla 1.3</td>
-                                                <td>Win 95+ / OSX.1+</td>
-                                                <td>1.3</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Mozilla 1.4</td>
-                                                <td>Win 95+ / OSX.1+</td>
-                                                <td>1.4</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Mozilla 1.5</td>
-                                                <td>Win 95+ / OSX.1+</td>
-                                                <td>1.5</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Mozilla 1.6</td>
-                                                <td>Win 95+ / OSX.1+</td>
-                                                <td>1.6</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Mozilla 1.7</td>
-                                                <td>Win 98+ / OSX.1+</td>
-                                                <td>1.7</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Mozilla 1.8</td>
-                                                <td>Win 98+ / OSX.1+</td>
-                                                <td>1.8</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Seamonkey 1.1</td>
-                                                <td>Win 98+ / OSX.2+</td>
-                                                <td>1.8</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Gecko</td>
-                                                <td>Epiphany 2.20</td>
-                                                <td>Gnome</td>
-                                                <td>1.8</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Webkit</td>
-                                                <td>Safari 1.2</td>
-                                                <td>OSX.3</td>
-                                                <td>125.5</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Webkit</td>
-                                                <td>Safari 1.3</td>
-                                                <td>OSX.3</td>
-                                                <td>312.8</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Webkit</td>
-                                                <td>Safari 2.0</td>
-                                                <td>OSX.4+</td>
-                                                <td>419.3</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Webkit</td>
-                                                <td>Safari 3.0</td>
-                                                <td>OSX.4+</td>
-                                                <td>522.1</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Webkit</td>
-                                                <td>OmniWeb 5.5</td>
-                                                <td>OSX.4+</td>
-                                                <td>420</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Webkit</td>
-                                                <td>iPod Touch / iPhone</td>
-                                                <td>iPod</td>
-                                                <td>420.1</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Webkit</td>
-                                                <td>S60</td>
-                                                <td>S60</td>
-                                                <td>413</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Opera 7.0</td>
-                                                <td>Win 95+ / OSX.1+</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Opera 7.5</td>
-                                                <td>Win 95+ / OSX.2+</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Opera 8.0</td>
-                                                <td>Win 95+ / OSX.2+</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Opera 8.5</td>
-                                                <td>Win 95+ / OSX.2+</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Opera 9.0</td>
-                                                <td>Win 95+ / OSX.3+</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Opera 9.2</td>
-                                                <td>Win 88+ / OSX.3+</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Opera 9.5</td>
-                                                <td>Win 88+ / OSX.3+</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Opera for Wii</td>
-                                                <td>Wii</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Nokia N800</td>
-                                                <td>N800</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Presto</td>
-                                                <td>Nintendo DS browser</td>
-                                                <td>Nintendo DS</td>
-                                                <td>8.5</td>
-                                                <td>C/A<sup>1</sup></td>
-                                            </tr>
-                                            <tr>
-                                                <td>KHTML</td>
-                                                <td>Konqureror 3.1</td>
-                                                <td>KDE 3.1</td>
-                                                <td>3.1</td>
-                                                <td>C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>KHTML</td>
-                                                <td>Konqureror 3.3</td>
-                                                <td>KDE 3.3</td>
-                                                <td>3.3</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>KHTML</td>
-                                                <td>Konqureror 3.5</td>
-                                                <td>KDE 3.5</td>
-                                                <td>3.5</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Tasman</td>
-                                                <td>Internet Explorer 4.5</td>
-                                                <td>Mac OS 8-9</td>
-                                                <td>-</td>
-                                                <td>X</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Tasman</td>
-                                                <td>Internet Explorer 5.1</td>
-                                                <td>Mac OS 7.6-9</td>
-                                                <td>1</td>
-                                                <td>C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Tasman</td>
-                                                <td>Internet Explorer 5.2</td>
-                                                <td>Mac OS 8-X</td>
-                                                <td>1</td>
-                                                <td>C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Misc</td>
-                                                <td>NetFront 3.1</td>
-                                                <td>Embedded devices</td>
-                                                <td>-</td>
-                                                <td>C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Misc</td>
-                                                <td>NetFront 3.4</td>
-                                                <td>Embedded devices</td>
-                                                <td>-</td>
-                                                <td>A</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Misc</td>
-                                                <td>Dillo 0.8</td>
-                                                <td>Embedded devices</td>
-                                                <td>-</td>
-                                                <td>X</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Misc</td>
-                                                <td>Links</td>
-                                                <td>Text only</td>
-                                                <td>-</td>
-                                                <td>X</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Misc</td>
-                                                <td>Lynx</td>
-                                                <td>Text only</td>
-                                                <td>-</td>
-                                                <td>X</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Misc</td>
-                                                <td>IE Mobile</td>
-                                                <td>Windows Mobile 6</td>
-                                                <td>-</td>
-                                                <td>C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Misc</td>
-                                                <td>PSP browser</td>
-                                                <td>PSP</td>
-                                                <td>-</td>
-                                                <td>C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Other browsers</td>
-                                                <td>All others</td>
-                                                <td>-</td>
-                                                <td>-</td>
-                                                <td>U</td>
-                                            </tr>
+                                            <!--                                            <tr>
+                                                                                            <td>1</td>
+                                                                                            <td>20.02.2019                                              
+                                                                                            </td>
+                                                                                            <td>Rio</td>
+                                                                                            <td><select>
+                                                                                                    <option>Новый</option>
+                                                                                                    <option>Отменен</option>
+                                                                                                    <option>В работе</option>
+                                                                                                    <option>Закрыт</option>
+                                                                                                </select></td>
+                                                                                            <td><select>
+                                                                                                    <option ng-repeat="element in currAdmins" value="{{element.id}}">{{element.name}}</option>
+                                                                                                </select></td>
+                                            
+                                            
+                                                                                        </tr>
+                                                                                        <tr>
+                                                                                            <td>2</td>
+                                                                                            <td>20.02.2019                                              
+                                                                                            </td>
+                                                                                            <td>Dehli</td>
+                                                                                            <td><select>
+                                                                                                    <option>Новый</option>
+                                                                                                    <option>Отменен</option>
+                                                                                                    <option>В работе</option>
+                                                                                                    <option>Закрыт</option>
+                                                                                                </select></td>
+                                                                                            <td><select>
+                                                                                                    <option ng-repeat="element in currAdmins" value="{{element.id}}">{{element.name}}</option>
+                                                                                                </select></td>
+                                            
+                                                                                        </tr>-->
+
+
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <th>Rendering engine</th>
-                                                <th>Browser</th>
-                                                <th>Platform(s)</th>
-                                                <th>Engine version</th>
-                                                <th>CSS grade</th>
+                                                <th>Номер</th>
+                                                <th>Дата</th>
+                                                <th>Комната</th>
+                                                <th>Статус</th>
+                                                <th>Исполнитель</th>
+
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -721,8 +483,17 @@
                                 <!-- /.box-body -->
                             </div>
                             <!-- /.box -->
+
+
+
+
                         </div>
                         <!-- /.col -->
+
+
+
+
+
                     </div>
                     <!-- /.row -->
                 </section>
@@ -754,7 +525,7 @@
         <script src="dist/js/material.min.js"></script>
         <script src="dist/js/ripples.min.js"></script>
         <script>
-                $.material.init();
+                                                                                                                $.material.init();
         </script>
         <!-- DataTables -->
         <script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
@@ -769,34 +540,34 @@
         <script src="dist/js/demo.js"></script>
         <!-- page script -->
         <script>
-                $(function () {
-                    $('#example1').DataTable({
-                        language: {
-                            //processing: "Traitement en cours...",
-                            search: "Поиск:",
-                            lengthMenu: "Показывать _MENU_ записей",
-                            info: "Показано с _START_ по _END_ из _TOTAL_ записей",
-                            //infoEmpty: "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
-                            //infoFiltered: "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
-                            //infoPostFix: "",
-                            loadingRecords: "Загрузка записей...",
-                            zeroRecords: "Записей не обнаружено",
-                            emptyTable: "Таблица пустая",
-                            paginate: {
-                                first: "Первая",
-                                previous: "Пред.",
-                                next: "След.",
-                                last: "Последняя"
-                            }
-                            //,
+                                                                                                                $(function () {
+                                                                                                                    $('#example1').DataTable({
+                                                                                                                        language: {
+                                                                                                                            //processing: "Traitement en cours...",
+                                                                                                                            search: "Поиск:",
+                                                                                                                            lengthMenu: "Показывать _MENU_ записей",
+                                                                                                                            info: "Показано с _START_ по _END_ из _TOTAL_ записей",
+                                                                                                                            //infoEmpty: "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
+                                                                                                                            //infoFiltered: "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
+                                                                                                                            //infoPostFix: "",
+                                                                                                                            loadingRecords: "Загрузка записей...",
+                                                                                                                            zeroRecords: "Записей не обнаружено",
+                                                                                                                            emptyTable: "Таблица пустая",
+                                                                                                                            paginate: {
+                                                                                                                                first: "Первая",
+                                                                                                                                previous: "Пред.",
+                                                                                                                                next: "След.",
+                                                                                                                                last: "Последняя"
+                                                                                                                            }
+                                                                                                                            //,
 //                        aria: {
 //                            sortAscending: ": activer pour trier la colonne par ordre croissant",
 //                            sortDescending: ": activer pour trier la colonne par ordre décroissant"
 //                        }
-                        }
-                    });
+                                                                                                                        }
+                                                                                                                    });
 
-                })
+                                                                                                                })
         </script>
     </body>
 </html>
