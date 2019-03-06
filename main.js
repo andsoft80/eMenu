@@ -207,7 +207,7 @@ app.post('/table/:tableName/action/:action', function (req, res) {
 
 
     }
-    if (action === 'get_columns') {//webix format
+    if (action === 'get_columns') {
 
 
         sqlStr = "DESC " + tableName;
@@ -355,6 +355,7 @@ app.post("/getauth", function (request, response) {
         parcel.email = request.session.user;
         parcel.name = request.session.name;
         parcel.clientid = request.session.clientid;
+        parcel.userid = request.session.userid;
 
     } else {
         parcel.email = 'empty';
