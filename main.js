@@ -110,6 +110,16 @@ app.listen(port, function () {
 
 /////////////universal sql api//////////////////////////////////
 app.post('/table/:tableName/action/:action', function (req, res) {
+    res.set({
+        'Content-Type': 'text/plain',
+        'charset': 'utf-8'
+    });
+    var curruser = req.session.user;
+    if (typeof curruser === 'undefined') {
+        res.write(JSON.stringify('Not authorized!'));
+        res.end();
+        return;
+    }
     var tableName = req.params.tableName;
     var action = req.params.action;
 
@@ -281,6 +291,7 @@ app.post("/checkuser", function (request, response) {
                 request.session.user = result[0].email;
                 request.session.name = result[0].name;
                 request.session.clientid = result[0].clientid;
+                request.session.userid = result[0].id;
             } else {
                 parcel.auth = 'notpass';
             }
@@ -377,7 +388,7 @@ app.get("/orders/:id/:clientid", function (request, response) {
         return;
     }
 
-    sqlStr = "select a.id,a.orderdate,b.name,a.status,a.adminid as admin from orders a  left join rooms b on a.roomid = b.id";
+    sqlStr = "select a.id,a.orderdate,b.name,a.roomid,a.status,a.content,a.adminid as admin from orders a  left join rooms b on a.roomid = b.id";
 
     if (request.params.id) {
         sqlStr = sqlStr + " where a.id=" + request.params.id;
@@ -405,13 +416,15 @@ app.get("/orders/:clientid", function (request, response) {
         'charset': 'utf-8'
     });
     var curruser = request.session.user;
+    
     if (typeof curruser === 'undefined') {
         response.write(JSON.stringify('Not authorized!'));
         response.end();
         return;
     }
 
-    sqlStr = "select a.id,a.orderdate,b.name,a.status,a.adminid as admin from orders a  left join rooms b on a.roomid = b.id";
+    sqlStr = "select a.id,a.orderdate,b.name,a.roomid,a.status,a.content,a.adminid as admin from orders a  left join rooms b on a.roomid = b.id";
+
 
     if (request.params.clientid) {
         sqlStr = sqlStr + " where a.clientid=" + request.params.clientid;
@@ -441,7 +454,8 @@ app.get("/orderstatus/:status/:clientid", function (request, response) {
         return;
     }
 
-    sqlStr = "select a.id,a.orderdate,b.name,a.status,a.adminid as admin from orders a  left join rooms b on a.roomid = b.id";
+    sqlStr = "select a.id,a.orderdate,b.name,a.roomid,a.status,a.content,a.adminid as admin from orders a  left join rooms b on a.roomid = b.id";
+
 
     if (request.params.status) {
         sqlStr = sqlStr + " where a.status='" + request.params.status + "'";
@@ -461,27 +475,31 @@ app.get("/orderstatus/:status/:clientid", function (request, response) {
 
 });
 
-app.get("/orderadmin/:id/:clentid", function (request, response) {
+app.get("/orderadmin/:clentid", function (request, response) {
     //response.setHeader("charset=utf-8");
     response.set({
         'Content-Type': 'text/plain',
         'charset': 'utf-8'
     });
     var curruser = request.session.user;
+    var curruserid = request.session.userid;
     if (typeof curruser === 'undefined') {
         response.write(JSON.stringify('Not authorized!'));
         response.end();
         return;
     }
 
-    sqlStr = "select a.id,a.orderdate,b.name,a.status,a.adminid as admin from orders a  left join rooms b on a.roomid = b.id";
+    sqlStr = "select a.id,a.orderdate,b.name,a.roomid,a.status,a.content,a.adminid as admin from orders a  left join rooms b on a.roomid = b.id";
 
-    if (request.params.id) {
-        sqlStr = sqlStr + " where a.adminid=" + request.params.id;
+
+    if (curruserid) {
+        sqlStr = sqlStr + " where a.adminid=" + curruserid;
     }
     if (request.params.clientid) {
         sqlStr = sqlStr + " and a.clientid=" + request.params.clientid;
     }
+    
+    sqlStr = sqlStr + " and a.status <> 'Закрыт' and a.status <> 'Отменен'";
     con.query(sqlStr, function (err, result) {
         if (err)
             response.end(JSON.stringify(err));

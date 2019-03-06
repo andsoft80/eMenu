@@ -181,17 +181,36 @@
                     //headers: {"Access-Control-Allow-Origin": "*"},
                     success: function (data) {
 
-                    $scope.currOrders = JSON.parse(data);
-                            $scope.newOrdersQty = $scope.currOrders.length;
+                            var orders = JSON.parse(data);
+                            $scope.newOrdersQty = orders.length;
                             $scope.$apply();
                     }
             }
             );
             }
+            
+            function getMyOrders() {
+
+            $.ajax({
+            type: "get",
+                    async: false,
+                    url: "/orderadmin/" + $scope.currUserClientid,
+                    //headers: {"Access-Control-Allow-Origin": "*"},
+                    success: function (data) {
+
+                    $scope.currOrders = JSON.parse(data);
+                            
+                            $scope.$apply();
+                    }
+            }
+            );
+            }
+            
             $scope.getAuth();
                     getAdmins();
                     //getRooms();
                     getNewOrders();
+                    getMyOrders();
                     $scope.change = function (order) {
                     var parcel = {};
                             parcel.id = order.id;
@@ -214,12 +233,9 @@
             $scope.currOrderContent = JSON.parse(order.content);
                     $scope.$apply();
             }
-            
             setInterval (getNewOrders, 1000);
             }
             );
-    
-    
         </script>
     </head>
     <body class="hold-transition skin-blue sidebar-mini" ng-controller="myCtrl" ng-cloak>
@@ -339,8 +355,8 @@
                                 </span>
                             </a>
                             <ul class="treeview-menu">
-                                <li class="active"><a href="index.html"><i class="fa fa-circle-o"></i> Новые заказы</a></li>
-                                <li><a href="myorders.html"><i class="fa fa-circle-o"></i> Мои открытые заказы</a></li>
+                                <li ><a href="index.html"><i class="fa fa-circle-o"></i> Новые заказы</a></li>
+                                <li class="active"><a href="myorders.html"><i class="fa fa-circle-o"></i> Мои открытые заказы</a></li>
                                 <li><a href="allorders.html"><i class="fa fa-circle-o"></i> Все заказы</a></li>
                             </ul>
                         </li>
@@ -377,12 +393,12 @@
                 <section class="content-header">
                     <h1>
                         Заказы
-                        <small>запросы пользователей</small>
+                        <small>открытые заказы пользователя</small>
                     </h1>
                     <ol class="breadcrumb">
                         <li><a href="#"><i class="fa fa-dashboard"></i> Главная</a></li>
                         <li><a href="#">Заказы</a></li>
-                        <li class="active">Новые заказы</li>
+                        <li class="active">Мои открытые заказы</li>
                     </ol>
                 </section>
 
@@ -413,7 +429,7 @@
                         <div class="col-md-6  col-md-pull-6 col-xs-12 ">
                             <div class="box" >
                                 <div class="box-header">
-                                    <h3 class="box-title">Новые заказы</h3>
+                                    <h3 class="box-title">Мои открытые заказы</h3>
                                 </div>
                                 <!-- /.box-header -->
                                 <div class="box-body">
