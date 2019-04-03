@@ -4,7 +4,8 @@
  * and open the template in the editor.
  */
 ///////base set//////////////////////////////
-var mySqlHost = '185.220.35.146';
+//var mySqlHost = 'localhost';
+var mySqlHost = 'localhost';
 var mySqlDB = 'emenu';
 var http = require("http");
 var fs = require('fs');
@@ -43,8 +44,8 @@ var secret = 'death666';
 
 var con = mysql.createConnection({
     host: mySqlHost,
-    user: 'user',
-    password: 'user',
+    user: 'root',
+    password: 'root',
     database: mySqlDB
 });
 var mySqlConnect = function () {
