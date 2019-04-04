@@ -272,6 +272,7 @@ app.post("/adduser", function (request, response) {
 
 });
 app.post("/checkuser", function (request, response) {
+    console.log(JSON.stringify(request.body));
     var parcel = {"auth": ""};
     var email = request.body.email;
     var pwd = request.body.pwd;
