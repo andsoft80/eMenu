@@ -119,6 +119,7 @@ app.post('/table/:tableName/action/:action', function (req, res) {
     if(req.body.an){
         authNeed = req.body.an;
     };
+    console.log(authNeed);
     var curruser = req.session.user;
     if (typeof curruser === 'undefined' && authNeed == 1) {
         res.write(JSON.stringify('Not authorized!'));
