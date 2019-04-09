@@ -115,8 +115,12 @@ app.post('/table/:tableName/action/:action', function (req, res) {
         'Content-Type': 'text/plain',
         'charset': 'utf-8'
     });
+    var authNeed = 1; 
+    if(req.body.an){
+        authNeed = req.body.an;
+    };
     var curruser = req.session.user;
-    if (typeof curruser === 'undefined') {
+    if (typeof curruser === 'undefined' && authNeed == 1) {
         res.write(JSON.stringify('Not authorized!'));
         res.end();
         return;
