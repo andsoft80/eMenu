@@ -115,11 +115,12 @@ app.post('/table/:tableName/action/:action', function (req, res) {
         'Content-Type': 'text/plain',
         'charset': 'utf-8'
     });
-    var authNeed = 1; 
-    if(req.body.an==0){
+    var authNeed = 1;
+    if (req.body.an == 0) {
         authNeed = req.body.an;
-    };
-    
+    }
+    ;
+
     var curruser = req.session.user;
     if (typeof curruser === 'undefined' && authNeed == 1) {
         res.write(JSON.stringify('Not authorized!'));
@@ -132,11 +133,17 @@ app.post('/table/:tableName/action/:action', function (req, res) {
     if (action === 'post') {
         sqlStr = "INSERT INTO " + tableName + " (";
         for (i = 0; i < Object.keys(req.body).length; i++) {
+            if (Object.keys(req.body)[i] == 'an') {
+                continue;
+            }
             sqlStr = sqlStr + Object.keys(req.body)[i] + ",";
         }
         sqlStr = sqlStr.substring(0, sqlStr.length - 1);
         sqlStr = sqlStr + ") VALUES (";
         for (i = 0; i < Object.keys(req.body).length; i++) {
+            if (Object.keys(req.body)[i] == 'an') {
+                continue;
+            }
             sqlStr = sqlStr + "'" + req.body[Object.keys(req.body)[i]] + "',";
         }
         sqlStr = sqlStr.substring(0, sqlStr.length - 1);
@@ -154,6 +161,9 @@ app.post('/table/:tableName/action/:action', function (req, res) {
         sqlStr = "update " + tableName + " set ";
         for (i = 0; i < Object.keys(req.body).length; i++) {
             if (Object.keys(req.body)[i] === 'id') {
+                continue;
+            }
+            if (Object.keys(req.body)[i] == 'an') {
                 continue;
             }
             sqlStr = sqlStr + Object.keys(req.body)[i] + "='" + req.body[Object.keys(req.body)[i]] + "',"
@@ -424,7 +434,7 @@ app.get("/orders/:clientid", function (request, response) {
         'charset': 'utf-8'
     });
     var curruser = request.session.user;
-    
+
     if (typeof curruser === 'undefined') {
         response.write(JSON.stringify('Not authorized!'));
         response.end();
@@ -506,7 +516,7 @@ app.get("/orderadmin/:clentid", function (request, response) {
     if (request.params.clientid) {
         sqlStr = sqlStr + " and a.clientid=" + request.params.clientid;
     }
-    
+
     sqlStr = sqlStr + " and a.status <> 'Закрыт' and a.status <> 'Отменен'";
     con.query(sqlStr, function (err, result) {
         if (err)
