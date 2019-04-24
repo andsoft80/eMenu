@@ -111,32 +111,43 @@ app.listen(port, function () {
 
 function sendNewOrderLetters(clientid, roomid, content) {
     var roomname = null;
-    sqlStr = "select name from rooms where id="+roomid;
+    sqlStr = "select name from rooms where id=" + roomid;
     con.query(sqlStr, function (err, result) {
         if (err)
             console.log(JSON.stringify(err));
-        
+
         roomname = result[0].name;
-        console.log(roomname);
+
+        sqlStr = "select email from users where clientid=" + clientid;
+        con.query(sqlStr, function (err, result) {
+            if (err)
+                console.log(JSON.stringify(err));
+
+            for (var i = 0; i < result.length; i++) {
+                var mail = {
+                    from: "eMenu(not reply)",
+                    to: result[i].email,
+                    subject: "Новый заказ",
+                    text: content
+
+                };
+
+                smtpTransport.sendMail(mail, function (error, res) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+
+                    }
+
+                    smtpTransport.close();
+                });
+            }
+
+
+        });
 
     });
-//    var mail = {
-//        from: "eMenu(not reply)",
-//        to: email,
-//        subject: "Новый заказ",
-//        text: content
-//
-//    };
-//
-//    smtpTransport.sendMail(mail, function (error, res) {
-//        if (error) {
-//            console.log(error);
-//        } else {
-//
-//        }
-//
-//        smtpTransport.close();
-//    });
+
 
 }
 
