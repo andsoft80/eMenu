@@ -112,24 +112,26 @@ app.listen(port, function () {
 function sendNewOrderLetters(clientid, roomid, content) {
     var roomname = null;
     var contentHtml = '';
-    
-    contentJSON = JSON.parse(content);
-    for(var i = 0; i < contentJSON.length; i++){
-        contentHtml += '<p>'+contentJSON[i].group+'</p><ul>';
-        for(var j = 0; j < contentJSON.length; j++){
-            contentHtml +='<li>'+contentJSON[i].items[j].name+' '+contentJSON[i].items[j].qty+'</li>';
-            
-        }
-        contentHtml +='</ul>';
-    }
-    
-    
+
+
+
+
     sqlStr = "select name from rooms where id=" + roomid;
     con.query(sqlStr, function (err, result) {
         if (err)
             console.log(JSON.stringify(err));
 
         roomname = result[0].name;
+        contentJSON = JSON.parse(content);
+        contentHtml += '<p>' + 'Комната: '+roomname+'</p>';
+                for (var i = 0; i < contentJSON.length; i++) {
+            contentHtml += '<p>' + contentJSON[i].group + '</p><ul>';
+            for (var j = 0; j < contentJSON.length; j++) {
+                contentHtml += '<li>' + contentJSON[i].items[j].name + ' ' + contentJSON[i].items[j].qty + '</li>';
+
+            }
+            contentHtml += '</ul>';
+        }
 
         sqlStr = "select email from users where clientid=" + clientid;
         con.query(sqlStr, function (err, result) {
