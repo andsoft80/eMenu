@@ -109,6 +109,37 @@ app.listen(port, function () {
     console.log('Start : localhost: ' + port);
 });
 
+function sendNewOrderLetters(clientid, roomid, content) {
+    var roomname = null;
+    sqlStr = "select name from rooms where id="+roomid;
+    con.query(sqlStr, function (err, result) {
+        if (err)
+            console.log(JSON.stringify(err));
+        
+        roomname = result[0].name;
+        console.log(roomname);
+
+    });
+//    var mail = {
+//        from: "eMenu(not reply)",
+//        to: email,
+//        subject: "Новый заказ",
+//        text: content
+//
+//    };
+//
+//    smtpTransport.sendMail(mail, function (error, res) {
+//        if (error) {
+//            console.log(error);
+//        } else {
+//
+//        }
+//
+//        smtpTransport.close();
+//    });
+
+}
+
 /////////////universal sql api//////////////////////////////////
 app.post('/table/:tableName/action/:action', function (req, res) {
     res.set({
@@ -153,7 +184,7 @@ app.post('/table/:tableName/action/:action', function (req, res) {
             if (err)
                 res.end(JSON.stringify(err));
             res.end(JSON.stringify(result));
-
+            sendNewOrderLetters(req.body['clientid'], req.body['roomid'], req.body['content']);
         });
     }
     if (action === 'put') {
