@@ -126,7 +126,7 @@ function sendNewOrderLetters(clientid, roomid, content) {
         contentHtml += '<p>' + 'Комната: '+roomname+'</p>';
                 for (var i = 0; i < contentJSON.length; i++) {
             contentHtml += '<p>' + contentJSON[i].group + '</p><ul>';
-            for (var j = 0; j < contentJSON.length; j++) {
+            for (var j = 0; j < contentJSON[i].items.length; j++) {
                 contentHtml += '<li>' + contentJSON[i].items[j].name + ' ' + contentJSON[i].items[j].qty + '</li>';
 
             }
