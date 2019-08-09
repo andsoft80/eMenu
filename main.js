@@ -8,6 +8,7 @@
 var mySqlHost = 'localhost';
 var mySqlDB = 'emenu';
 var http = require("http");
+var https = require('https');
 var fs = require('fs');
 var util = require('util');
 var url = require('url');
@@ -44,8 +45,8 @@ var secret = 'death666';
 
 var con = mysql.createConnection({
     host: mySqlHost,
-    user: 'user',
-    password: 'user',
+    user: 'root',
+    password: 'root',
     database: mySqlDB
 });
 var mySqlConnect = function () {
@@ -105,9 +106,19 @@ con.connect(function (err) {
 
 });
 
-app.listen(port, function () {
-    console.log('Start : localhost: ' + port);
-});
+var options = {
+  key: fs.readFileSync('key.txt'),
+  cert: fs.readFileSync('crt.txt')
+};
+
+//https.createServer(options, app, function (req, res) {
+//    console.log('Start : https:\\localhost: ' + port);
+//}).listen(port);
+https.createServer(options, app).listen(443);
+
+//app.listen(port, function () {
+//    console.log('Start : localhost: ' + port);
+//});
 
 function sendNewOrderLetters(clientid, roomid, content) {
     var roomname = null;
