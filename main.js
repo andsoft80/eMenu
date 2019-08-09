@@ -45,8 +45,8 @@ var secret = 'death666';
 
 var con = mysql.createConnection({
     host: mySqlHost,
-    user: 'root',
-    password: 'root',
+    user: 'user',
+    password: 'user',
     database: mySqlDB
 });
 var mySqlConnect = function () {
