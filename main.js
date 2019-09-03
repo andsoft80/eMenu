@@ -45,8 +45,8 @@ var secret = 'death666';
 
 var con = mysql.createConnection({
     host: mySqlHost,
-    user: 'user',
-    password: 'user',
+    user: 'root',
+    password: 'VjuexbqVecrekm',
     database: mySqlDB
 });
 var mySqlConnect = function () {
@@ -111,14 +111,13 @@ var options = {
   cert: fs.readFileSync('crt.txt')
 };
 
-//https.createServer(options, app, function (req, res) {
-//    console.log('Start : https:\\localhost: ' + port);
-//}).listen(port);
-https.createServer(options, app).listen(443);
 
-//app.listen(port, function () {
-//    console.log('Start : localhost: ' + port);
-//});
+
+//https.createServer(options, app).listen(443);
+
+app.listen(port, function () {
+    console.log('Start : localhost: ' + port);
+});
 
 function sendNewOrderLetters(clientid, roomid, content) {
     var roomname = null;
